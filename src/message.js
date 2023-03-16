@@ -32,10 +32,10 @@ async function msgSaveLastMessage(message) {
 // 检查环境变量是否设置
 async function msgCheckEnvIsReady(message) {
   if (!ENV.API_KEY) {
-    return sendMessageToTelegram('OpenAI API Key 未设置');
+    return sendMessageToTelegram('OpenAI API Keyが設定されていません。');
   }
   if (!DATABASE) {
-    return sendMessageToTelegram('DATABASE 未设置');
+    return sendMessageToTelegram('DATABASEが設定されていません。');
   }
   return null;
 }
@@ -50,7 +50,7 @@ async function msgFilterWhiteList(message) {
     // 白名单判断
     if (!ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `你没有权限使用这个命令, 请请联系管理员添加你的ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `このコマンドを使用する権限がありません。管理者に連絡して、あなたのID(${CURRENT_CHAT_CONTEXT.chat_id})をホワイトリストに追加してもらってください。`,
       );
     }
     return null;
@@ -65,20 +65,20 @@ async function msgFilterWhiteList(message) {
     // 白名单判断
     if (!ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `该群未开启聊天权限, 请请联系管理员添加群ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `このグループはチャット権限が有効になっていません。管理者に連絡して、グループID(${CURRENT_CHAT_CONTEXT.chat_id})をホワイトリストに追加してもらってください。`,
       );
     }
     return null;
   }
   return sendMessageToTelegram(
-      `暂不支持该类型(${SHARE_CONTEXT.chatType})的聊天`,
+      `(${SHARE_CONTEXT.chatType})タイプのチャットは現在サポートされていません。`,
   );
 }
 
 // 过滤非文本消息
 async function msgFilterNonTextMessage(message) {
   if (!message.text) {
-    return sendMessageToTelegram('暂不支持非文本格式消息');
+    return sendMessageToTelegram('非テキスト形式のメッセージは現在サポートされていません');
   }
   return null;
 }
@@ -192,7 +192,7 @@ async function msgHandleRole(message) {
 // 聊天
 async function msgChatWithOpenAI(message) {
   try {
-    console.log('提问消息:'+message.text||'');
+    console.log('質問メッセージ:'+message.text||'');
     const historyDisable = ENV.AUTO_TRIM_HISTORY && ENV.MAX_HISTORY_LENGTH <= 0;
     setTimeout(() => sendChatActionToTelegram('typing').catch(console.error), 0);
     const historyKey = SHARE_CONTEXT.chatHistoryKey;
@@ -254,7 +254,7 @@ export async function msgProcessByChatType(message) {
   };
   if (!handlerMap.hasOwnProperty(SHARE_CONTEXT.chatType)) {
     return sendMessageToTelegram(
-        `暂不支持该类型(${SHARE_CONTEXT.chatType})的聊天`,
+        `このタイプ(${SHARE_CONTEXT.chatType})のチャットは現在サポートされていません`,
     );
   }
   const handlers = handlerMap[SHARE_CONTEXT.chatType];
@@ -267,7 +267,7 @@ export async function msgProcessByChatType(message) {
     } catch (e) {
       console.error(e);
       return sendMessageToTelegram(
-          `处理(${SHARE_CONTEXT.chatType})的聊天消息出错`,
+          `${SHARE_CONTEXT.chatType}のチャットメッセージの処理中にエラーが発生しました`,
       );
     }
   }
