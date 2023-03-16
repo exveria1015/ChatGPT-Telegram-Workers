@@ -26,54 +26,54 @@ const commandAuthCheck = {
 // 命令绑定
 const commandHandlers = {
   '/help': {
-    help: '获取命令帮助',
+    help: 'コマンドのヘルプを取得します',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandGetHelp,
   },
   '/new': {
-    help: '发起新的对话',
+    help: '新しい会話を開始します',
     scopes: ['all_private_chats', 'all_group_chats', 'all_chat_administrators'],
     fn: commandCreateNewChatContext,
     needAuth: commandAuthCheck.shareModeGroup,
   },
   '/start': {
-    help: '获取你的ID, 并发起新的对话',
+    help: 'あなたのIDを取得し、新しい会話を開始します',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandCreateNewChatContext,
     needAuth: commandAuthCheck.default,
   },
   '/img': {
-    help: '生成一张图片, 命令完整格式为 `/img 图片描述`, 例如`/img 月光下的沙滩`',
+    help: '画像を生成します。コマンドの完全な形式は /img image_description です。 例：/img beach_under_moonlight',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandGenerateImg,
     needAuth: commandAuthCheck.shareModeGroup,
   },
   '/version': {
-    help: '获取当前版本号, 判断是否需要更新',
+    help: '現在のバージョン番号を取得し、更新が必要かどうかを判断します',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandFetchUpdate,
     needAuth: commandAuthCheck.default,
   },
   '/setenv': {
-    help: '设置用户配置，命令完整格式为 /setenv KEY=VALUE',
+    help: 'ユーザー構成を設定します。コマンドの完全な形式は /setenv KEY=VALUE です',
     scopes: [],
     fn: commandUpdateUserConfig,
     needAuth: commandAuthCheck.shareModeGroup,
   },
   '/usage': {
-    help: '获取当前机器人的用量统计',
+    help: '現在のボットの使用状況を取得します',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandUsage,
     needAuth: commandAuthCheck.default,
   },
   '/system': {
-    help: '查看当前一些系统信息',
+    help: '現在のシステム情報を表示します',
     scopes: ['all_private_chats', 'all_chat_administrators'],
     fn: commandSystem,
     needAuth: commandAuthCheck.default,
   },
   '/role': {
-    help: '设置预设的身份',
+    help: 'プリセットの役割を設定します',
     scopes: ['all_private_chats'],
     fn: commandUpdateRole,
     needAuth: commandAuthCheck.shareModeGroup,
@@ -85,9 +85,9 @@ async function commandUpdateRole(message, command, subcommand) {
   if (subcommand==='show') {
     const size = Object.getOwnPropertyNames(USER_DEFINE.ROLE).length;
     if (size===0) {
-      return sendMessageToTelegram('还未定义任何角色');
+      return sendMessageToTelegram('現在役割が定義されていません');
     }
-    let showMsg = `当前已定义的角色如下(${size}):\n`;
+    let showMsg = `現在定義されている役割は以下の通りです(${size}):\n`;
     for (const role in USER_DEFINE.ROLE) {
       if (USER_DEFINE.ROLE.hasOwnProperty(role)) {
         showMsg+=`~${role}:\n<pre>`;
@@ -99,14 +99,15 @@ async function commandUpdateRole(message, command, subcommand) {
     return sendMessageToTelegram(showMsg);
   }
 
-  const helpMsg = '格式错误: 命令完整格式为 `/role 操作`\n'+
-      '当前支持以下`操作`:\n'+
-      '`/role show` 显示当前定义的角色.\n'+
-      '`/role 角色名 del` 删除指定名称的角色.\n'+
-      '`/role 角色名 KEY=VALUE` 设置指定角色的配置.\n'+
-      ' 目前以下设置项:\n'+
-      '  `SYSTEM_INIT_MESSAGE`:初始化消息\n'+
-      '  `OPENAI_API_EXTRA_PARAMS`:OpenAI API 额外参数，必须为JSON';
+  const helpMsg = '形式が正しくありません：コマンドの完全な形式は `/role 操作` です。\n'+
+      '以下の`操作`がサポートされています:\n'+
+      '`/role show` 現在定義されている役割を表示します。\n'+
+      '`/role role_name del` 指定された名前の役割を削除します。\n'+
+      '`/role role_name KEY=VALUE` 指定された役割の設定を設定します。\n'+
+      '以下の設定項目があります:\n'+
+      '  `SYSTEM_INIT_MESSAGE`: 初期化メッセージ\n'+
+      '  `OPENAI_API_EXTRA_PARAMS`: OpenAI APIの追加パラメーター、JSON形式である必要があります。';
+
 
   const kv = subcommand.indexOf(' ');
   if (kv === -1) {
@@ -124,10 +125,10 @@ async function commandUpdateRole(message, command, subcommand) {
               SHARE_CONTEXT.configStoreKey,
               JSON.stringify(Object.assign(USER_CONFIG, {USER_DEFINE: USER_DEFINE})),
           );
-          return sendMessageToTelegram('删除角色成功');
+          return sendMessageToTelegram('役割の削除に成功しました');
         }
       } catch (e) {
-        return sendMessageToTelegram(`删除角色错误: \`${e.message}\``);
+        return sendMessageToTelegram(`役割の削除中にエラーが発生しました: \`${e.message}\``);
       }
     }
     return sendMessageToTelegram(helpMsg);
@@ -150,15 +151,16 @@ async function commandUpdateRole(message, command, subcommand) {
         SHARE_CONTEXT.configStoreKey,
         JSON.stringify(Object.assign(USER_CONFIG, {USER_DEFINE: USER_DEFINE})),
     );
-    return sendMessageToTelegram('更新配置成功');
+    return sendMessageToTelegram('更新成功');
   } catch (e) {
-    return sendMessageToTelegram(`配置项格式错误: \`${e.message}\``);
+    return sendMessageToTelegram(`設定項目の形式エラー： \`${e.message}\``);
   }
 }
 
 async function commandGenerateImg(message, command, subcommand) {
   if (subcommand==='') {
-    return sendMessageToTelegram('请输入图片描述。命令完整格式为 \`/img 狸花猫\`');
+    return sendMessageToTelegram('画像の説明を入力してください。コマンドの完全な形式は \`/img 画像の説明\`です。');
+
   }
   try {
     setTimeout(() => sendChatActionToTelegram('upload_photo').catch(console.error), 0);
@@ -166,7 +168,7 @@ async function commandGenerateImg(message, command, subcommand) {
     try {
       return sendPhotoToTelegram(imgUrl);
     } catch (e) {
-      return sendMessageToTelegram(`图片:\n${imgUrl}`);
+      return sendMessageToTelegram(`画像:\n${imgUrl}`);
     }
   } catch (e) {
     return sendMessageToTelegram(`ERROR:IMG: ${e.message}`);
@@ -176,7 +178,7 @@ async function commandGenerateImg(message, command, subcommand) {
 // 命令帮助
 async function commandGetHelp(message, command, subcommand) {
   const helpMsg =
-      '当前支持以下命令:\n' +
+      '現在、以下のコマンドがサポートされています:\n' +
       Object.keys(commandHandlers)
           .map((key) => `${key}：${commandHandlers[key].help}`)
           .join('\n');
@@ -188,15 +190,15 @@ async function commandCreateNewChatContext(message, command, subcommand) {
   try {
     await DATABASE.delete(SHARE_CONTEXT.chatHistoryKey);
     if (command === '/new') {
-      return sendMessageToTelegram('新的对话已经开始');
+      return sendMessageToTelegram('新しい会話が開始されました');
     } else {
       if (SHARE_CONTEXT.chatType==='private') {
         return sendMessageToTelegram(
-            `新的对话已经开始，你的ID(${CURRENT_CHAT_CONTEXT.chat_id})`,
+            `新しい会話が開始されました、あなたのID(${CURRENT_CHAT_CONTEXT.chat_id})`,
         );
       } else {
         return sendMessageToTelegram(
-            `新的对话已经开始，群组ID(${CURRENT_CHAT_CONTEXT.chat_id})`,
+            `新しい会話が開始されました、グループID(${CURRENT_CHAT_CONTEXT.chat_id})`,
         );
       }
     }
@@ -210,7 +212,7 @@ async function commandUpdateUserConfig(message, command, subcommand) {
   const kv = subcommand.indexOf('=');
   if (kv === -1) {
     return sendMessageToTelegram(
-        '配置项格式错误: 命令完整格式为 /setenv KEY=VALUE',
+        '設定項目のフォーマットが間違っています：コマンドの完全なフォーマットは/setenv KEY=VALUEです。',
     );
   }
   const key = subcommand.slice(0, kv);
@@ -221,24 +223,24 @@ async function commandUpdateUserConfig(message, command, subcommand) {
         SHARE_CONTEXT.configStoreKey,
         JSON.stringify(USER_CONFIG),
     );
-    return sendMessageToTelegram('更新配置成功');
+    return sendMessageToTelegram('更新に成功しました');
   } catch (e) {
-    return sendMessageToTelegram(`配置项格式错误: ${e.message}`);
+    return sendMessageToTelegram(`設定項目の形式が正しくありません: ${e.message}`);
   }
 }
 
 async function commandFetchUpdate(message, command, subcommand) {
   const config = {
     headers: {
-      'User-Agent': 'TBXark/ChatGPT-Telegram-Workers',
+      'User-Agent': 'exveria1015/ChatGPT-Telegram-Workers',
     },
   };
   const current = {
     ts: ENV.BUILD_TIMESTAMP,
     sha: ENV.BUILD_VERSION,
   };
-  const ts = `https://raw.githubusercontent.com/TBXark/ChatGPT-Telegram-Workers/${ENV.UPDATE_BRANCH}/dist/timestamp`;
-  const info = `https://raw.githubusercontent.com/TBXark/ChatGPT-Telegram-Workers/${ENV.UPDATE_BRANCH}/dist/buildinfo.json`;
+  const ts = `https://raw.githubusercontent.com/exveria1015/ChatGPT-Telegram-Workers/${ENV.UPDATE_BRANCH}/dist/timestamp`;
+  const info = `https://raw.githubusercontent.com/exveria1015/ChatGPT-Telegram-Workers/${ENV.UPDATE_BRANCH}/dist/buildinfo.json`;
   let online = await fetch(info, config)
       .then((r) => r.json())
       .catch(() => null);
@@ -250,25 +252,25 @@ async function commandFetchUpdate(message, command, subcommand) {
 
   if (current.ts < online.ts) {
     return sendMessageToTelegram(
-        ` 发现新版本，当前版本: ${JSON.stringify(current)}，最新版本: ${JSON.stringify(online)}`,
+        `発見した新しいバージョン。現在のバージョン: ${JSON.stringify(current)}、最新バージョン: ${JSON.stringify(online)}`,
     );
   } else {
-    return sendMessageToTelegram(`当前已经是最新版本, 当前版本: ${JSON.stringify(current)}`);
+    return sendMessageToTelegram(`現在のバージョンは最新です。現在のバージョン: ${JSON.stringify(current)}`);
   }
 }
 
 
 async function commandUsage() {
   if (!ENV.ENABLE_USAGE_STATISTICS) {
-    return sendMessageToTelegram('当前机器人未开启用量统计');
+    return sendMessageToTelegram('現在、Botは利用統計を有効にしていません');
   }
   const usage = JSON.parse(await DATABASE.get(SHARE_CONTEXT.usageKey));
-  let text = '📊 当前机器人用量\n\nTokens:\n';
+  let text = '📊 現在のBotの使用量\n\nTokens:\n';
   if (usage?.tokens) {
     const {tokens} = usage;
     const sortedChats = Object.keys(tokens.chats || {}).sort((a, b) => tokens.chats[b] - tokens.chats[a]);
 
-    text += `- 总用量：${tokens.total || 0} tokens\n- 各聊天用量：`;
+    text += ` - 総使用量：${tokens.total || 0} tokens\n- 各チャットの使用量：`;
     for (let i = 0; i < Math.min(sortedChats.length, 30); i++) {
       text += `\n  - ${sortedChats[i]}: ${tokens.chats[sortedChats[i]]} tokens`;
     }
@@ -278,13 +280,13 @@ async function commandUsage() {
       text += '\n  ...';
     }
   } else {
-    text += '- 暂无用量';
+    text += '- 現在使用量はありません';
   }
   return sendMessageToTelegram(text);
 }
 
 async function commandSystem(message) {
-  let msg = '当前系统信息如下:\n';
+  let msg = '現在のシステム情報は以下のとおりです:\n';
   msg+='OpenAI模型:'+ENV.CHAT_MODEL+'\n';
   if (ENV.DEBUG_MODE) {
     msg+='<pre>';
@@ -312,7 +314,7 @@ async function commandEcho(message) {
 export async function handleCommandMessage(message) {
   if (ENV.DEV_MODE) {
     commandHandlers['/echo'] = {
-      help: '[DEBUG ONLY]回显消息',
+      help: '[DEBUG ONLY]エコーメッセージ',
       scopes: ['all_private_chats', 'all_chat_administrators'],
       fn: commandEcho,
       needAuth: commandAuthCheck.default,
@@ -329,21 +331,21 @@ export async function handleCommandMessage(message) {
             // 获取身份并判断
             const chatRole = await getChatRole(SHARE_CONTEXT.speakerId);
             if (chatRole === null) {
-              return sendMessageToTelegram('身份权限验证失败');
+              return sendMessageToTelegram('権限認証に失敗しました。');
             }
             if (!roleList.includes(chatRole)) {
-              return sendMessageToTelegram(`权限不足,需要${roleList.join(',')},当前:${chatRole}`);
+              return sendMessageToTelegram(`権限が不足しています。必要なロール：${roleList.join(',')}。現在のロール：${chatRole}`);
             }
           }
         }
       } catch (e) {
-        return sendMessageToTelegram(`身份验证出错:` + e.message);
+        return sendMessageToTelegram(`Authentication Error::` + e.message);
       }
       const subcommand = message.text.substring(key.length).trim();
       try {
         return await command.fn(message, key, subcommand);
       } catch (e) {
-        return sendMessageToTelegram(`命令执行错误: ${e.message}`);
+        return sendMessageToTelegram(`コマンドが正しく実行できませんでした: ${e.message}`);
       }
     }
   }
